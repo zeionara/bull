@@ -41,6 +41,9 @@ def pull(url: str, destination: str):
     for url in tqdm(urls):
         path = os.path.join(destination, url.split('/')[-1])
 
+        if os.path.isfile(path):
+            continue
+
         response = get(url, timeout = TIMEOUT)
 
         if response.status_code == 200:
