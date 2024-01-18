@@ -14,10 +14,7 @@ def main():
     pass
 
 
-@main.command()
-@argument('url', type = str)
-@argument('destination', type = str, default = 'assets')
-def pull(url: str, destination: str):
+def _pull(url: str, destination: str):
     prefix = '/'.join(url.split('/')[:3])
 
     response = get(url, timeout = TIMEOUT)
@@ -51,6 +48,25 @@ def pull(url: str, destination: str):
                 file.write(response.content)
         else:
             print(f'Can\'t download file {url}: response status is {response.status_code}')
+
+
+@main.command()
+@argument('url', type = str)
+@argument('destination', type = str, default = 'assets')
+def pull(url: str, destination: str):
+    _pull(url, destination)
+
+
+@main.command()
+@argument('thread', type = int)
+@argument('destination', type = str)
+def dull(thread: int, destination: str):
+    path = f'../Downloads/{destination}'
+
+    if not os.path.isdir(path):
+        os.makedirs(path)
+
+    _pull(f'https://2ch.hk/b/res/{thread}.html', path)
 
 
 if __name__ == '__main__':
