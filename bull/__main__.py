@@ -1,12 +1,12 @@
 import os, re
 
-from click import group, argument
+from click import group, argument, option
 from requests import get
 from tqdm import tqdm
 
 
 TIMEOUT = 60
-MEDIA_URL_PATTERN = re.compile(r'/b[^"]+\.(?:mp4|webm)')
+MEDIA_URL_PATTERN = re.compile(r'[^"\']+i\.arhivach\.xyz[^"\']+\.(?:mp4|webm)')
 
 
 @group
@@ -14,8 +14,8 @@ def main():
     pass
 
 
-def _pull(url: str, destination: str):
-    prefix = '/'.join(url.split('/')[:3])
+def _pull(url: str, destination: str, pretend: bool):
+    # prefix = '/'.join(url.split('/')[:3])
 
     response = get(url, timeout = TIMEOUT)
 
@@ -29,7 +29,7 @@ def _pull(url: str, destination: str):
     urls = []
 
     for match in MEDIA_URL_PATTERN.findall(page):
-        urls.append(f'{prefix}/{match}')
+        urls.append(match)
 
     urls = tuple(set(urls))
 
@@ -41,20 +41,24 @@ def _pull(url: str, destination: str):
         if os.path.isfile(path):
             continue
 
-        response = get(url, timeout = TIMEOUT)
-
-        if response.status_code == 200:
-            with open(path, 'wb') as file:
-                file.write(response.content)
+        if pretend:
+            print(f'Pulling {url}...')
         else:
-            print(f'Can\'t download file {url}: response status is {response.status_code}')
+            response = get(url, timeout = TIMEOUT)
+
+            if response.status_code == 200:
+                with open(path, 'wb') as file:
+                    file.write(response.content)
+            else:
+                print(f'Can\'t download file {url}: response status is {response.status_code}')
 
 
 @main.command()
 @argument('url', type = str)
 @argument('destination', type = str, default = 'assets')
-def pull(url: str, destination: str):
-    _pull(url, destination)
+@option('--pretend', '-p', is_flag = True)
+def pull(url: str, destination: str, pretend: bool):
+    _pull(url, destination, pretend)
 
 
 @main.command()
