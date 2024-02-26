@@ -14,7 +14,7 @@ def main():
     pass
 
 
-def _pull(url: str, destination: str, pretend: bool):
+def _pull(url: str, destination: str, pretend: bool = False, local: bool = False):
     # prefix = '/'.join(url.split('/')[:3])
 
     response = get(url, timeout = TIMEOUT)
@@ -41,6 +41,10 @@ def _pull(url: str, destination: str, pretend: bool):
         if os.path.isfile(path):
             continue
 
+        if local:
+            url = url.split('/', maxsplit = 3)[-1].replace('/', '---slash---')
+            url = f'http://localhost:8080/media/{url}'
+
         if pretend:
             print(f'Pulling {url}...')
         else:
@@ -57,8 +61,9 @@ def _pull(url: str, destination: str, pretend: bool):
 @argument('url', type = str)
 @argument('destination', type = str, default = 'assets')
 @option('--pretend', '-p', is_flag = True)
-def pull(url: str, destination: str, pretend: bool):
-    _pull(url, destination, pretend)
+@option('--local', '-l', is_flag = True)
+def pull(url: str, destination: str, pretend: bool, local: bool):
+    _pull(url, destination, pretend, local)
 
 
 @main.command()
