@@ -1,0 +1,22 @@
+python -m bull pull http://localhost:8080/thread/979244 assets/idiots-01
+python -m bull pull http://localhost:8080/thread/978886 assets/idiots-02
+python -m bull pull http://localhost:8080/thread/978112 assets/idiots-03
+python -m bull pull http://localhost:8080/thread/976259 assets/idiots-04
+python -m bull pull http://localhost:8080/thread/981925 assets/idiots-05
+python -m bull pull http://localhost:8080/thread/982326 assets/idiots-06
+python -m bull pull http://localhost:8080/thread/976210 assets/idiots-07
+python -m bull pull http://localhost:8080/thread/985222 assets/idiots-08
+python -m bull pull http://localhost:8080/thread/987444 assets/idiots-09
+python -m bull pull http://localhost:8080/thread/987584 assets/idiots-10
+python -m bull pull http://localhost:8080/thread/990713 assets/idiots-11
+python -m bull pull http://localhost:8080/thread/992795 assets/idiots-12
+python -m bull pull http://localhost:8080/thread/972272 assets/idiots-13
+python -m bull pull http://localhost:8080/thread/974131 assets/idiots-14
+
+python -m bull pull http://arhivach.top/thread/995499 assets/idiots-15
+python -m bull pull http://arhivach.top/thread/1001682 assets/idiots-16
+python -m bull pull http://arhivach.top/thread/1004256 assets/idiots-17
+python -m bull pull http://arhivach.top/thread/1004256 assets/idiots-18
+python -m bull pull http://arhivach.top/thread/1008959 assets/idiots-19
+python -m bull pull http://arhivach.top/thread/1010966 assets/idiots-20
+python -m bull pull http://arhivach.top/thread/1012598 assets/idiots-21
