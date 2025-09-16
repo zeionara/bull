@@ -4,9 +4,10 @@ from click import group, argument, option
 from requests import get
 from tqdm import tqdm
 
-
+ARHIVACH = True
 TIMEOUT = 60
-MEDIA_URL_PATTERN = re.compile(r'[^"\']+i\.arhivach\.xyz[^"\']+\.(?:mp4|webm)')
+# MEDIA_URL_PATTERN = re.compile(r'[^"\']+i\.arhivach\.xyz[^"\']+\.(?:mp4|webm)')
+MEDIA_URL_PATTERN = re.compile(r'/b/src/[0-9]+/[0-9]+\.(?:mp4|webm)')
 
 
 @group
@@ -29,9 +30,10 @@ def _pull(url: str, destination: str, pretend: bool = False, local: bool = False
     urls = []
 
     for match in MEDIA_URL_PATTERN.findall(page):
-        urls.append(match)
-
-    urls = tuple(set(urls))
+        if ARHIVACH:
+            urls.append(match)
+        else:
+            urls.append(f'https://2ch.hk/{match}')
 
     print(f'Found {len(urls)} urls')
 
@@ -44,6 +46,8 @@ def _pull(url: str, destination: str, pretend: bool = False, local: bool = False
         if local:
             url = url.split('/', maxsplit = 3)[-1].replace('/', '---slash---')
             url = f'http://localhost:8080/media/{url}'
+        else:
+            url = f'https://2ch.hk{url}'
 
         if pretend:
             print(f'Pulling {url}...')
