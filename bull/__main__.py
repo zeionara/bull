@@ -1,6 +1,7 @@
 import os, re
+from time import sleep
 
-from click import group, argument
+from click import group, argument, option
 from requests import get
 from tqdm import tqdm
 
@@ -53,8 +54,22 @@ def _pull(url: str, destination: str):
 @main.command()
 @argument('url', type = str)
 @argument('destination', type = str, default = 'assets')
-def pull(url: str, destination: str):
-    _pull(url, destination)
+@option('-i', '--interval', type = float, default = None)
+def pull(url: str, destination: str, interval: float):
+    if not os.path.isdir(destination):
+        os.makedirs(destination)
+
+    if interval is None:
+        _pull(url, destination)
+    else:
+        while True:
+            try:
+                _pull(url, destination)
+            except AssertionError:
+                print('Stop pooling')
+            else:
+                print(f'Making a pause for {interval} seconds before checking again...')
+                sleep(interval)
 
 
 @main.command()
