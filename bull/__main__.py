@@ -67,6 +67,7 @@ def pull(url: str, destination: str, interval: float):
                 _pull(url, destination)
             except AssertionError:
                 print('Stop pooling')
+                break
             else:
                 print(f'Making a pause for {interval} seconds before checking again...')
                 sleep(interval)
