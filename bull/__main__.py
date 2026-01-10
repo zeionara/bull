@@ -1,13 +1,19 @@
-import os, re
+import os
+import re
 from time import sleep
 
 from click import group, argument, option
-from requests import get
+from requests import Session
+from requests.exceptions import ConnectTimeout
 from tqdm import tqdm
 
+from .headers import headers
 
-TIMEOUT = 60
+
+TIMEOUT = 300
 MEDIA_URL_PATTERN = re.compile(r'/b[^"]+\.(?:mp4|webm)')
+
+N_ATTEMPTS = 10
 
 
 @group
@@ -16,9 +22,20 @@ def main():
 
 
 def _pull(url: str, destination: str):
-    prefix = '/'.join(url.split('/')[:3])
+    session = Session()
 
-    response = get(url, timeout = TIMEOUT)
+    if 'arhivach' in url:
+        parts = url.split('/')
+
+        prefix = '/'.join((parts[0], parts[1], f'i.{parts[2]}', 'storage'))
+    else:
+        prefix = '/'.join(url.split('/')[:3])
+
+    print(f'Querying page {url}...')
+
+    response = session.get(url, timeout = TIMEOUT)
+
+    print(f'Got page {url}...')
 
     assert response.status_code == 200
 
@@ -30,25 +47,45 @@ def _pull(url: str, destination: str):
     urls = []
 
     for match in MEDIA_URL_PATTERN.findall(page):
-        urls.append(f'{prefix}/{match}')
+        urls.append(f'{prefix}{match}')
 
     urls = tuple(set(urls))
 
     print(f'Found {len(urls)} urls')
+    pbar = tqdm(urls)
 
-    for url in tqdm(urls):
+    for url in pbar:
         path = os.path.join(destination, url.split('/')[-1])
+
+        pbar.set_description(f'Handling file {url} -> {path}')
 
         if os.path.isfile(path):
             continue
 
-        response = get(url, timeout = TIMEOUT)
+        os.system(f'wget -O {path} {url} -q')
 
-        if response.status_code == 200:
-            with open(path, 'wb') as file:
-                file.write(response.content)
-        else:
-            print(f'Can\'t download file {url}: response status is {response.status_code}')
+        # n_attempts = N_ATTEMPTS
+        # failed = False
+
+        # while True:
+        #     try:
+        #         response = session.get(url, timeout = TIMEOUT, headers = headers)
+        #     except ConnectTimeout:
+        #         if n_attempts > 0:
+        #             n_attempts -= 1
+        #         else:
+        #             failed = True
+        #             break
+
+        # if failed:
+        #     print(f'Failed to pull {url} after {N_ATTEMPTS} attempts. Skipping...')
+        #     continue
+
+        # if response.status_code == 200:
+        #     with open(path, 'wb') as file:
+        #         file.write(response.content)
+        # else:
+        #     print(f'Can\'t download file {url}: response status is {response.status_code}')
 
 
 @main.command()
