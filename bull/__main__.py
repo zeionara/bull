@@ -4,16 +4,14 @@ from time import sleep
 
 from click import group, argument, option
 from requests import Session
-from requests.exceptions import ConnectTimeout
+from requests.exceptions import ConnectTimeout, SSLError
 from tqdm import tqdm
-
-from .headers import headers
 
 
 TIMEOUT = 300
 MEDIA_URL_PATTERN = re.compile(r'/b[^"]+\.(?:mp4|webm)')
 
-N_ATTEMPTS = 10
+N_ATTEMPTS = 3
 
 
 @group
@@ -62,7 +60,16 @@ def _pull(url: str, destination: str):
         if os.path.isfile(path):
             continue
 
-        os.system(f'wget -O {path} {url} -q')
+        attempt_count = 0
+
+        while True:
+            try:
+                os.system(f'wget -T {TIMEOUT} -O {path} {url} -q')
+            except (ConnectTimeout, SSLError):
+                if attempt_count < N_ATTEMPTS:
+                    attempt_count += 1
+                    continue
+                raise
 
         # n_attempts = N_ATTEMPTS
         # failed = False
