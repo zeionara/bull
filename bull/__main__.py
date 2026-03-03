@@ -31,7 +31,17 @@ def _pull(url: str, destination: str):
 
     print(f'Querying page {url}...')
 
-    response = session.get(url, timeout = TIMEOUT)
+    response = None
+    attempt_count = 0
+
+    while response is None:
+        try:
+            response = session.get(url, timeout = TIMEOUT)
+        except (ConnectTimeout, SSLError):
+            if attempt_count < N_ATTEMPTS:
+                attempt_count += 1
+                continue
+            raise
 
     print(f'Got page {url}...')
 
